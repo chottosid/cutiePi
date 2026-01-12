@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ClockHand } from './ClockHand';
 import { PiOverlay } from './PiOverlay';
 import { playTickSound, startAlarm, stopAlarm } from '../utils/audio';

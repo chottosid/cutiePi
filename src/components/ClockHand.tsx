@@ -10,7 +10,7 @@ interface ClockHandProps {
   isSettingMode: boolean;
 }
 
-export function ClockHand({ type, rotation, isDraggable, onRotate, isSettingMode }: ClockHandProps) {
+export function ClockHand({ type, rotation, isDraggable, onRotate }: ClockHandProps) {
   const [isDragging, setIsDragging] = useState(false);
   const handRef = useRef<HTMLDivElement>(null);
 
@@ -83,7 +83,7 @@ export function ClockHand({ type, rotation, isDraggable, onRotate, isSettingMode
     setIsDragging(false);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = (_e: React.TouchEvent) => {
     if (!isDraggable) return;
     setIsDragging(true);
   };
