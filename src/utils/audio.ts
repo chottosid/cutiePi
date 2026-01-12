@@ -24,44 +24,21 @@ export function playTickSound(intensity: number = 1): void {
   const boingOsc = ctx.createOscillator();
   const boingGain = ctx.createGain();
 
-  boingOsc.type = 'triangle';
+  boingOsc.type = 'sine';
   // Quick pitch drop for cartoonish effect
-  boingOsc.frequency.setValueAtTime(600, now);
-  boingOsc.frequency.exponentialRampToValueAtTime(250, now + 0.1);
+  boingOsc.frequency.setValueAtTime(500, now);
+  boingOsc.frequency.exponentialRampToValueAtTime(200, now + 0.08);
 
-  const boingVolume = 0.25 * intensity;
+  const boingVolume = 0.06 * intensity;
   boingGain.gain.setValueAtTime(boingVolume, now);
-  boingGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+  boingGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
   boingOsc.connect(boingGain);
   boingGain.connect(ctx.destination);
 
-  // Add a playful "wobble" effect with frequency modulation
-  const vibratoOsc = ctx.createOscillator();
-  const vibratoGain = ctx.createGain();
-  const vibratoDepth = ctx.createOscillator();
-
-  vibratoOsc.type = 'sine';
-  vibratoOsc.frequency.setValueAtTime(400, now);
-
-  vibratoDepth.type = 'sine';
-  vibratoDepth.frequency.setValueAtTime(25, now); // 25Hz wobble
-
-  vibratoGain.gain.setValueAtTime(50, now);
-  vibratoGain.gain.exponentialRampToValueAtTime(1, now + 0.08);
-
-  vibratoDepth.connect(vibratoGain);
-  vibratoGain.connect(vibratoOsc.frequency);
-  vibratoOsc.connect(ctx.destination);
-
-  // Play sounds
+  // Play sound
   boingOsc.start(now);
-  boingOsc.stop(now + 0.15);
-
-  vibratoDepth.start(now);
-  vibratoDepth.stop(now + 0.1);
-  vibratoOsc.start(now);
-  vibratoOsc.stop(now + 0.1);
+  boingOsc.stop(now + 0.1);
 }
 
 // Cute button click sound
