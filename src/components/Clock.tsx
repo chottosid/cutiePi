@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ClockHand } from './ClockHand';
 import { PiOverlay } from './PiOverlay';
-import { playTickSound, startAlarm, stopAlarm } from '../utils/audio';
+import { playTickSound, startAlarm, stopAlarm, playClickSound, playSuccessSound } from '../utils/audio';
 
 export function Clock() {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -84,12 +84,16 @@ export function Clock() {
   };
 
   const handleAlarmCorrect = () => {
+    playSuccessSound();
     stopAlarm();
     setIsAlarmTriggered(false);
-    clearAlarm();
+    setAlarmHour(null);
+    setAlarmMinute(null);
+    setAlarmTimeDisplay('');
   };
 
   const startSettingMode = () => {
+    playClickSound();
     setIsSettingMode(true);
     // Initialize setting time to current time
     setSettingHour(currentTime.getHours() % 12);
@@ -114,6 +118,7 @@ export function Clock() {
   };
 
   const confirmAlarm = () => {
+    playClickSound();
     // Convert setting time to 24-hour format alarm
     const currentHour = currentTime.getHours();
     const period = Math.floor(currentHour / 12);
@@ -126,12 +131,14 @@ export function Clock() {
   };
 
   const clearAlarm = () => {
+    playClickSound();
     setAlarmHour(null);
     setAlarmMinute(null);
     setAlarmTimeDisplay('');
   };
 
   const cancelSetting = () => {
+    playClickSound();
     setIsSettingMode(false);
   };
 

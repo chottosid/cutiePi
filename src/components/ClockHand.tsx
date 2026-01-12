@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { playTickSound } from '../utils/audio';
 
@@ -13,6 +13,7 @@ interface ClockHandProps {
 export function ClockHand({ type, rotation, isDraggable, onRotate }: ClockHandProps) {
   const [isDragging, setIsDragging] = useState(false);
   const handRef = useRef<HTMLDivElement>(null);
+  const lastTriggeredAngle = useRef<number>(rotation);
 
   // Hand dimensions and styles
   const handConfig = {
@@ -58,37 +59,41 @@ export function ClockHand({ type, rotation, isDraggable, onRotate }: ClockHandPr
     return Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) + 90;
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!isDraggable) return;
     setIsDragging(true);
     e.preventDefault();
-  };
+  }, [isDraggable]);
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !isDraggable) return;
 
     const angle = getAngleFromEvent(e.clientX, e.clientY);
     const normalizedAngle = ((angle % 360) + 360) % 360;
 
-    // Only trigger tick sound if moved significantly
-    const currentRotation = rotation;
-    if (Math.abs(normalizedAngle - currentRotation) > 5) {
+    // Detect crossing minute marks (every 6 degrees)
+    const currentMinuteMark = Math.floor(lastTriggeredAngle.current / 6);
+    const newMinuteMark = Math.floor(normalizedAngle / 6);
+
+    // Check if we crossed a minute mark
+    if (currentMinuteMark !== newMinuteMark) {
       playTickSound(0.5);
+      lastTriggeredAngle.current = normalizedAngle;
     }
 
     onRotate(normalizedAngle);
-  };
+  }, [isDragging, isDraggable, onRotate]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
-  const handleTouchStart = (_e: React.TouchEvent) => {
+  const handleTouchStart = useCallback((_e: React.TouchEvent) => {
     if (!isDraggable) return;
     setIsDragging(true);
-  };
+  }, [isDraggable]);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isDragging || !isDraggable) return;
     e.preventDefault();
 
@@ -96,12 +101,18 @@ export function ClockHand({ type, rotation, isDraggable, onRotate }: ClockHandPr
     const angle = getAngleFromEvent(touch.clientX, touch.clientY);
     const normalizedAngle = ((angle % 360) + 360) % 360;
 
-    if (Math.abs(normalizedAngle - rotation) > 5) {
+    // Detect crossing minute marks (every 6 degrees)
+    const currentMinuteMark = Math.floor(lastTriggeredAngle.current / 6);
+    const newMinuteMark = Math.floor(normalizedAngle / 6);
+
+    // Check if we crossed a minute mark
+    if (currentMinuteMark !== newMinuteMark) {
       playTickSound(0.5);
+      lastTriggeredAngle.current = normalizedAngle;
     }
 
     onRotate(normalizedAngle);
-  };
+  }, [isDragging, isDraggable, onRotate]);
 
   useEffect(() => {
     if (isDragging) {
@@ -117,7 +128,14 @@ export function ClockHand({ type, rotation, isDraggable, onRotate }: ClockHandPr
         window.removeEventListener('touchend', handleMouseUp);
       };
     }
-  }, [isDragging, isDraggable, rotation]);
+  }, [isDragging, isDraggable, handleMouseMove, handleMouseUp, handleTouchMove]);
+
+  // Update last triggered angle when rotation changes from outside
+  useEffect(() => {
+    if (!isDragging) {
+      lastTriggeredAngle.current = rotation;
+    }
+  }, [rotation, isDragging]);
 
   return (
     <motion.div

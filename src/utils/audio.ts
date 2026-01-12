@@ -15,30 +15,122 @@ export function initAudio(): AudioContext {
   return audioContext;
 }
 
-// Mechanical tick sound for clock hand movement
+// Cartoonish "boing" sound for clock hand movement
 export function playTickSound(intensity: number = 1): void {
   const ctx = initAudio();
-  const tickOsc = ctx.createOscillator();
-  const tickGain = ctx.createGain();
-  const tickFilter = ctx.createBiquadFilter();
+  const now = ctx.currentTime;
 
-  tickOsc.type = 'square';
-  tickOsc.frequency.setValueAtTime(800, ctx.currentTime);
-  tickOsc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.03);
+  // Main spring/boing oscillator
+  const boingOsc = ctx.createOscillator();
+  const boingGain = ctx.createGain();
 
-  tickFilter.type = 'highpass';
-  tickFilter.frequency.setValueAtTime(1000, ctx.currentTime);
+  boingOsc.type = 'triangle';
+  // Quick pitch drop for cartoonish effect
+  boingOsc.frequency.setValueAtTime(600, now);
+  boingOsc.frequency.exponentialRampToValueAtTime(250, now + 0.1);
 
-  const volume = 0.15 * intensity;
-  tickGain.gain.setValueAtTime(volume, ctx.currentTime);
-  tickGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.03);
+  const boingVolume = 0.25 * intensity;
+  boingGain.gain.setValueAtTime(boingVolume, now);
+  boingGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
 
-  tickOsc.connect(tickFilter);
-  tickFilter.connect(tickGain);
-  tickGain.connect(ctx.destination);
+  boingOsc.connect(boingGain);
+  boingGain.connect(ctx.destination);
 
-  tickOsc.start(ctx.currentTime);
-  tickOsc.stop(ctx.currentTime + 0.04);
+  // Add a playful "wobble" effect with frequency modulation
+  const vibratoOsc = ctx.createOscillator();
+  const vibratoGain = ctx.createGain();
+  const vibratoDepth = ctx.createOscillator();
+
+  vibratoOsc.type = 'sine';
+  vibratoOsc.frequency.setValueAtTime(400, now);
+
+  vibratoDepth.type = 'sine';
+  vibratoDepth.frequency.setValueAtTime(25, now); // 25Hz wobble
+
+  vibratoGain.gain.setValueAtTime(50, now);
+  vibratoGain.gain.exponentialRampToValueAtTime(1, now + 0.08);
+
+  vibratoDepth.connect(vibratoGain);
+  vibratoGain.connect(vibratoOsc.frequency);
+  vibratoOsc.connect(ctx.destination);
+
+  // Play sounds
+  boingOsc.start(now);
+  boingOsc.stop(now + 0.15);
+
+  vibratoDepth.start(now);
+  vibratoDepth.stop(now + 0.1);
+  vibratoOsc.start(now);
+  vibratoOsc.stop(now + 0.1);
+}
+
+// Cute button click sound
+export function playClickSound(): void {
+  const ctx = initAudio();
+  const now = ctx.currentTime;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, now);
+  osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
+
+  gain.gain.setValueAtTime(0.3, now);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.1);
+}
+
+// Success sound - happy ascending notes
+export function playSuccessSound(): void {
+  const ctx = initAudio();
+  const now = ctx.currentTime;
+
+  const notes = [523, 659, 784]; // C5, E5, G5 - happy major chord
+
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now + i * 0.1);
+
+    gain.gain.setValueAtTime(0.2, now + i * 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.2);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now + i * 0.1);
+    osc.stop(now + i * 0.1 + 0.25);
+  });
+}
+
+// Error sound - gentle wrong answer feedback
+export function playErrorSound(): void {
+  const ctx = initAudio();
+  const now = ctx.currentTime;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(200, now);
+  osc.frequency.linearRampToValueAtTime(150, now + 0.15);
+
+  gain.gain.setValueAtTime(0.2, now);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.2);
 }
 
 // Start escalating alarm sound

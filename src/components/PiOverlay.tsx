@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PI_DIGITS } from '../utils/piDigits';
+import { playErrorSound } from '../utils/audio';
 
 interface PiOverlayProps {
   isOpen: boolean;
@@ -68,6 +69,7 @@ export function PiOverlay({ isOpen, alarmHour, alarmMinute, onCorrect }: PiOverl
     // If they typed a wrong digit at current position, show error
     if (digitsAfterDecimal.length > 0 && correctCount < digitsAfterDecimal.length) {
       // Wrong digit entered - shake but don't stop progress
+      playErrorSound();
       setIsWrong(true);
       setTimeout(() => setIsWrong(false), 300);
     }
