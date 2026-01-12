@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800&display=swap');
+
+@theme {
+  --color-kawaii-pink: #FFB6C1;
+  --color-kawaii-pink-light: #FFC0CB;
+  --color-kawaii-mint: #98FB98;
+  --color-kawaii-mint-light: #E8F5E8;
+  --color-kawaii-cream: #FFFACD;
+  --color-kawaii-plum: #DDA0DD;
+  --color-kawaii-bg: #FFE4EC;
+
+  --font-family-fredoka: 'Fredoka One', cursive;
+  --font-family-nunito: 'Nunito', sans-serif;
+}
+
+:root {
+  font-family: var(--font-family-nunito);
+  line-height: 1.5;
+  font-weight: 600;
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
